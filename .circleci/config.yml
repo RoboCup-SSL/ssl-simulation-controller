@@ -1,0 +1,57 @@
+version: 2
+jobs:
+  app:
+    docker:
+    - image: circleci/golang:1.14
+
+    working_directory: /go/src/github.com/RoboCup-SSL/ssl-simulation-controller
+    steps:
+    - checkout
+    - run: go get -v -t -d ./...
+    - run: go test -v ./...
+    - run:
+        working_directory: cmd/ssl-simulation-controller
+        command: |
+          GOOS=linux GOARCH=amd64 go build -o ../../release/ssl-simulation-controller_linux_amd64
+          GOOS=darwin GOARCH=amd64 go build -o ../../release/ssl-simulation-controller_darwin_amd64
+          GOOS=windows GOARCH=amd64 go build -o ../../release/ssl-simulation-controller_windows_amd64.exe
+    - persist_to_workspace:
+        root: .
+        paths:
+        - release/*
+
+  publish-github-release:
+    docker:
+    - image: circleci/golang:1.14
+    steps:
+    - attach_workspace:
+        at: .
+    - run:
+        name: "Prepare artifacts"
+        working_directory: release
+        command: |
+          mv ssl-simulation-controller_linux_amd64 ssl-simulation-controller_${CIRCLE_TAG}_linux_amd64
+          mv ssl-simulation-controller_darwin_amd64 ssl-simulation-controller_${CIRCLE_TAG}_darwin_amd64
+          mv ssl-simulation-controller_windows_amd64.exe ssl-simulation-controller_${CIRCLE_TAG}_windows_amd64.exe
+    - run:
+        name: "Publish Release on GitHub"
+        command: |
+          go get github.com/tcnksm/ghr
+          ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./release/
+
+workflows:
+  version: 2
+  main:
+    jobs:
+    - app:
+        filters:
+          tags:
+            only: /.*/
+    - publish-github-release:
+        requires:
+        - app
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^v.*/
