@@ -22,7 +22,8 @@ type SimulationController struct {
 	lastRefereeMsg   *referee.Referee
 	fieldSize        *vision.SSL_GeometryFieldSize
 
-	ballReplacer BallReplacer
+	ballReplacer         BallReplacer
+	robotCountMaintainer RobotCountMaintainer
 }
 
 func NewSimulationController(visionAddress, refereeAddress, trackerAddress string, simControlPort string) (c *SimulationController) {
@@ -32,6 +33,7 @@ func NewSimulationController(visionAddress, refereeAddress, trackerAddress strin
 	c.trackerServer = sslnet.NewMulticastServer(trackerAddress, c.onNewTrackerData)
 	c.simControlPort = simControlPort
 	c.ballReplacer.c = c
+	c.robotCountMaintainer.c = c
 	return
 }
 
@@ -98,6 +100,7 @@ func (c *SimulationController) handle() {
 	}
 
 	c.ballReplacer.handleReplaceBall()
+	c.robotCountMaintainer.handleRobotCount()
 }
 
 func (c *SimulationController) Start() {

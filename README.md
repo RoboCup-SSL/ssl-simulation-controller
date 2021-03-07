@@ -7,9 +7,9 @@
 
 A controller for SSL simulation tournaments, that:
  * places the ball automatically, if it can not be placed by the teams
- * TODO: Adds and removes robots, if the robot count does not fit
+ * Adds and removes robots, if the robot count does not match the max robot count in the referee message
    * During gameplay, if the [conditions](https://robocup-ssl.github.io/ssl-rules/sslrules.html#_robot_substitution) are met
-   * During stop by selecting robots nearest to either crossing of half-way line and touch line)
+   * During halt by selecting robots nearest to either crossing of half-way line and touch line)
  * TODO: Set robot limits based on some configuration
 
 ## Usage
