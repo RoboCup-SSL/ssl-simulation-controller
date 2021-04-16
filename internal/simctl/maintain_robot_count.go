@@ -61,6 +61,9 @@ func (r *RobotCountMaintainer) updateRobotCount(robots []*tracker.TrackedRobot, 
 	}
 	if len(robots) < maxRobots {
 		y := float64(*r.c.fieldSize.FieldWidth) / 2000.0
+		if team == referee.Team_BLUE {
+			y *= -1
+		}
 		x := 0.1
 		for i := 0; i < 100; i++ {
 			pos := geom.NewVector2(x, y)
