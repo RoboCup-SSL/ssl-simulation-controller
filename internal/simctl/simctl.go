@@ -24,9 +24,10 @@ type SimulationController struct {
 
 	ballReplacer         BallReplacer
 	robotCountMaintainer RobotCountMaintainer
+	robotSpecsSetter     RobotSpecSetter
 }
 
-func NewSimulationController(visionAddress, refereeAddress, trackerAddress string, simControlPort string) (c *SimulationController) {
+func NewSimulationController(visionAddress, refereeAddress, trackerAddress, simControlPort, robotSpecConfig string) (c *SimulationController) {
 	c = new(SimulationController)
 	c.visionServer = sslnet.NewMulticastServer(visionAddress, c.onNewVisionData)
 	c.refereeServer = sslnet.NewMulticastServer(refereeAddress, c.onNewRefereeData)
@@ -34,6 +35,8 @@ func NewSimulationController(visionAddress, refereeAddress, trackerAddress strin
 	c.simControlPort = simControlPort
 	c.ballReplacer.c = c
 	c.robotCountMaintainer.c = c
+	c.robotSpecsSetter.c = c
+	c.robotSpecsSetter.LoadRobotSpecs(robotSpecConfig)
 	return
 }
 
@@ -101,6 +104,7 @@ func (c *SimulationController) handle() {
 
 	c.ballReplacer.handleReplaceBall()
 	c.robotCountMaintainer.handleRobotCount()
+	c.robotSpecsSetter.handleRobotSpecs()
 }
 
 func (c *SimulationController) Start() {

@@ -12,10 +12,11 @@ var visionAddress = flag.String("visionAddress", "224.5.23.2:10006", "The addres
 var trackerAddress = flag.String("trackerAddress", "224.5.23.2:10010", "The address (ip+port) from which tracker packages are received")
 var refereeAddress = flag.String("refereeAddress", "224.5.23.1:10003", "The address (ip+port) from which referee packages are received")
 var simControlPort = flag.String("simControlPort", "10300", "The port to which simulation control packets are send")
+var robotSpecConfig = flag.String("robotSpecConfig", "config/robot-specs.yaml", "The robot specs config file")
 
 func main() {
 	flag.Parse()
-	ctl := simctl.NewSimulationController(*visionAddress, *refereeAddress, *trackerAddress, *simControlPort)
+	ctl := simctl.NewSimulationController(*visionAddress, *refereeAddress, *trackerAddress, *simControlPort, *robotSpecConfig)
 	ctl.Start()
 
 	signals := make(chan os.Signal, 1)
