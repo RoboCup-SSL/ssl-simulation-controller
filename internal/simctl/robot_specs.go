@@ -50,8 +50,14 @@ func (r *RobotSpecSetter) LoadRobotSpecs(configFile string) {
 }
 
 func (r *RobotSpecSetter) handleRobotSpecs() {
-	if *r.c.lastRefereeMsg.Command != referee.Referee_HALT {
-		// Only during HALT
+	switch *r.c.lastRefereeMsg.Stage {
+	case referee.Referee_NORMAL_FIRST_HALF_PRE,
+		referee.Referee_NORMAL_SECOND_HALF_PRE,
+		referee.Referee_EXTRA_FIRST_HALF_PRE,
+		referee.Referee_EXTRA_SECOND_HALF_PRE:
+		// accept
+	default:
+		// Only in pre-stages
 		return
 	}
 
