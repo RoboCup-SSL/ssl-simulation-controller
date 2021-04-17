@@ -25,6 +25,7 @@ type SimulationController struct {
 	ballReplacer         BallReplacer
 	robotCountMaintainer RobotCountMaintainer
 	robotSpecsSetter     RobotSpecSetter
+	geometrySetter       GeometrySetter
 }
 
 func NewSimulationController(visionAddress, refereeAddress, trackerAddress, simControlPort, robotSpecConfig string) (c *SimulationController) {
@@ -37,6 +38,8 @@ func NewSimulationController(visionAddress, refereeAddress, trackerAddress, simC
 	c.robotCountMaintainer.c = c
 	c.robotSpecsSetter.c = c
 	c.robotSpecsSetter.LoadRobotSpecs(robotSpecConfig)
+	c.geometrySetter.c = c
+	c.geometrySetter.LoadGeometry()
 	return
 }
 
@@ -105,6 +108,7 @@ func (c *SimulationController) handle() {
 	c.ballReplacer.handleReplaceBall()
 	c.robotCountMaintainer.handleRobotCount()
 	c.robotSpecsSetter.handleRobotSpecs()
+	c.geometrySetter.handleGeometry()
 }
 
 func (c *SimulationController) Start() {
