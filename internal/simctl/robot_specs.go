@@ -3,6 +3,7 @@ package simctl
 import (
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/referee"
 	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes/any"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -13,13 +14,14 @@ type TeamRobotSpecs struct {
 }
 
 type RobotSpec struct {
-	Radius             float32 `yaml:"radius"`
-	Height             float32 `yaml:"height"`
-	Mass               float32 `yaml:"mass"`
-	MaxLinearKickSpeed float32 `yaml:"max_linear_kick_speed"`
-	MaxChipKickSpeed   float32 `yaml:"max_chip_kick_speed"`
-	CenterToDribbler   float32 `yaml:"center_to_dribbler"`
-	Limits             Limits  `yaml:"limits"`
+	Radius             float32                `yaml:"radius"`
+	Height             float32                `yaml:"height"`
+	Mass               float32                `yaml:"mass"`
+	MaxLinearKickSpeed float32                `yaml:"max_linear_kick_speed"`
+	MaxChipKickSpeed   float32                `yaml:"max_chip_kick_speed"`
+	CenterToDribbler   float32                `yaml:"center_to_dribbler"`
+	Limits             Limits                 `yaml:"limits"`
+	CustomErforce      CustomRobotSpecErForce `yaml:"custom_erforce"`
 }
 
 type Limits struct {
@@ -29,6 +31,11 @@ type Limits struct {
 	AccBrakeAngularMax    float32 `yaml:"acc_brake_angular_max,omitempty"`
 	VelAbsoluteMax        float32 `yaml:"vel_absolute_max,omitempty"`
 	VelAngularMax         float32 `yaml:"vel_angular_max,omitempty"`
+}
+
+type CustomRobotSpecErForce struct {
+	ShootRadius    float32 `yaml:"shoot_radius"`
+	DribblerHeight float32 `yaml:"dribbler_height"`
 }
 
 type RobotSpecSetter struct {
@@ -106,6 +113,20 @@ func mapRobotSpec(spec RobotSpec) (protoSpec *RobotSpecs) {
 	protoSpec.MaxChipKickSpeed = &spec.MaxChipKickSpeed
 	protoSpec.CenterToDribbler = &spec.CenterToDribbler
 	protoSpec.Limits = mapRobotLimits(spec.Limits)
+
+	customErForce := RobotSpecErForce{
+		ShootRadius:    &spec.CustomErforce.ShootRadius,
+		DribblerHeight: &spec.CustomErforce.DribblerHeight,
+	}
+	customErForceSerialized, err := proto.Marshal(&customErForce)
+	if err != nil {
+		log.Println("Could not serialize custom ER-Force robot specs: ", err)
+	}
+	customErForce.ProtoReflect().Descriptor().FullName()
+	protoSpec.Custom = append(protoSpec.Custom, &any.Any{
+		TypeUrl: "RobotSpecErForce",
+		Value:   customErForceSerialized,
+	})
 	return
 }
 

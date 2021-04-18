@@ -25,6 +25,7 @@ protoc -I"./proto" -I"$GOPATH/src" --go_out="$GOPATH/src" proto/ssl_gc_game_even
 protoc -I"./proto" -I"$GOPATH/src" --go_out="$GOPATH/src" proto/ssl_gc_referee_message.proto
 
 # simulation control
+protoc -I"./proto" -I"$GOPATH/src" --go_out="$GOPATH/src" proto/ssl_simulation_custom_erforce_robot_spec.proto
 protoc -I"./proto" -I"$GOPATH/src" --go_out="$GOPATH/src" proto/ssl_simulation_error.proto
 protoc -I"./proto" -I"$GOPATH/src" --go_out="$GOPATH/src" proto/ssl_simulation_config.proto
 protoc -I"./proto" -I"$GOPATH/src" --go_out="$GOPATH/src" proto/ssl_simulation_control.proto
