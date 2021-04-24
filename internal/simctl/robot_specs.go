@@ -49,8 +49,7 @@ func (r *RobotSpecSetter) LoadRobotSpecs(configFile string) {
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		log.Println("Could not read robot spec file: ", err)
-	}
-	if err := yaml.Unmarshal(data, &r.teamRobotSpecs); err != nil {
+	} else if err := yaml.Unmarshal(data, &r.teamRobotSpecs); err != nil {
 		log.Println("Could not unmarshal robot spec file: ", err)
 	}
 	r.appliedTeams = map[referee.Team]string{}
