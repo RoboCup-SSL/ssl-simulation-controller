@@ -36,6 +36,7 @@ type Limits struct {
 type CustomRobotSpecErForce struct {
 	ShootRadius    float32 `yaml:"shoot_radius"`
 	DribblerHeight float32 `yaml:"dribbler_height"`
+	DribblerWidth  float32 `yaml:"dribbler_width"`
 }
 
 type RobotSpecSetter struct {
@@ -116,6 +117,7 @@ func mapRobotSpec(spec RobotSpec) (protoSpec *RobotSpecs) {
 	customErForce := RobotSpecErForce{
 		ShootRadius:    &spec.CustomErforce.ShootRadius,
 		DribblerHeight: &spec.CustomErforce.DribblerHeight,
+		DribblerWidth:  &spec.CustomErforce.DribblerWidth,
 	}
 	customErForceSerialized, err := proto.Marshal(&customErForce)
 	if err != nil {
