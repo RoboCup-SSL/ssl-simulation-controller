@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine AS build
+FROM golang:1.16-alpine AS build
 WORKDIR /go/src/github.com/RoboCup-SSL/ssl-simulation-controller
 COPY go.mod go.mod
 RUN go mod download
