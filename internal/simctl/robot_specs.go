@@ -75,26 +75,29 @@ func (r *RobotSpecSetter) handleRobotSpecs() {
 func (r *RobotSpecSetter) updateTeam(team referee.Team, teamName string) {
 	if r.appliedTeams[team] != teamName {
 		if spec, ok := r.teamRobotSpecs.Teams[teamName]; ok {
-			protoSpec := mapRobotSpec(spec)
-			protoSpec.Id = new(referee.RobotId)
-			protoSpec.Id.Id = new(uint32)
-			protoSpec.Id.Team = new(referee.Team)
-			*protoSpec.Id.Id = 0
-			*protoSpec.Id.Team = team
-			r.sendConfig(protoSpec)
+			var protoSpecs []*RobotSpecs
+			for id := 0; id < 16; id++ {
+				protoSpec := mapRobotSpec(spec)
+				protoSpec.Id = new(referee.RobotId)
+				protoSpec.Id.Id = new(uint32)
+				protoSpec.Id.Team = new(referee.Team)
+				*protoSpec.Id.Team = team
+				*protoSpec.Id.Id = uint32(id)
+				protoSpecs = append(protoSpecs, protoSpec)
+			}
+			r.sendConfig(protoSpecs)
 			r.appliedTeams[team] = teamName
 		}
 	}
 }
 
-func (r *RobotSpecSetter) sendConfig(robotSpec *RobotSpecs) {
+func (r *RobotSpecSetter) sendConfig(robotSpec []*RobotSpecs) {
 	log.Printf("Sending robot spec %v", robotSpec)
 
 	command := SimulatorCommand{
 		Config: &SimulatorConfig{
-			RobotSpecs: []*RobotSpecs{
-				robotSpec,
-			}},
+			RobotSpecs: robotSpec,
+		},
 	}
 
 	if data, err := proto.Marshal(&command); err != nil {
