@@ -14,11 +14,26 @@ import (
 type RobotCountMaintainer struct {
 	c *SimulationController
 
-	lastTimeSendCommand time.Time
-	haltTime            *time.Time
+	lastTimeSendCommand     time.Time
+	robotCountMismatchSince map[referee.Team]time.Time
+	lastUpdate              time.Time
+}
+
+func (r *RobotCountMaintainer) init() {
+	r.lastTimeSendCommand = time.Now()
+	r.robotCountMismatchSince = map[referee.Team]time.Time{}
+	r.robotCountMismatchSince[referee.Team_BLUE] = time.Time{}
+	r.robotCountMismatchSince[referee.Team_YELLOW] = time.Time{}
 }
 
 func (r *RobotCountMaintainer) handleRobotCount() {
+
+	preLastUpdate := r.lastUpdate
+	r.lastUpdate = time.Now()
+	if r.lastUpdate.Sub(preLastUpdate) > time.Second {
+		// First update since a second, probably a simulator restart
+		r.init()
+	}
 
 	if time.Now().Sub(r.lastTimeSendCommand) < 500*time.Millisecond {
 		// Placed ball just recently
@@ -51,12 +66,24 @@ func (r *RobotCountMaintainer) updateRobotCount(robots []*tracker.TrackedRobot, 
 	substCenterNeg := geom.NewVector2Float32(0, -*substCenterPos.Y)
 	substRectPos := geom.NewRectangleFromCenter(substCenterPos, 2, float64(*r.c.fieldSize.BoundaryWidth)/1000+0.2)
 	substRectNeg := geom.NewRectangleFromCenter(substCenterNeg, 2, float64(*r.c.fieldSize.BoundaryWidth)/1000+0.2)
-	if len(robots) > 0 && len(robots) > maxRobots {
+
+	if len(robots) != maxRobots && r.robotCountMismatchSince[team].IsZero() {
+		r.robotCountMismatchSince[team] = time.Now()
+	}
+
+	if time.Now().Sub(r.robotCountMismatchSince[team]) < 3*time.Second {
+		return
+	}
+
+	if len(robots) > maxRobots {
 		r.sortRobotsByDistanceToSubstitutionPos(robots)
-		if *r.c.lastRefereeMsg.Command == referee.Referee_HALT ||
-			substRectPos.IsPointInside(robots[0].Pos) ||
-			substRectNeg.IsPointInside(robots[0].Pos) {
-			r.removeRobot(robots[0].RobotId)
+		for i := 0; i < len(robots)-maxRobots; i++ {
+			if *r.c.lastRefereeMsg.Command == referee.Referee_HALT ||
+				substRectPos.IsPointInside(robots[i].Pos) ||
+				substRectNeg.IsPointInside(robots[i].Pos) {
+				r.removeRobot(robots[i].RobotId)
+				r.robotCountMismatchSince[team] = time.Time{}
+			}
 		}
 	}
 	if len(robots) < maxRobots {
@@ -70,6 +97,7 @@ func (r *RobotCountMaintainer) updateRobotCount(robots []*tracker.TrackedRobot, 
 			if r.isFreeOfObstacles(pos) {
 				id := r.nextFreeRobotId(team)
 				r.addRobot(id, pos)
+				r.robotCountMismatchSince[team] = time.Time{}
 				break
 			}
 			x *= -1
