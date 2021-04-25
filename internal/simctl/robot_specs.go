@@ -125,7 +125,7 @@ func mapRobotSpec(spec RobotSpec) (protoSpec *RobotSpecs) {
 	}
 	customErForce.ProtoReflect().Descriptor().FullName()
 	protoSpec.Custom = append(protoSpec.Custom, &any.Any{
-		TypeUrl: "RobotSpecErForce",
+		TypeUrl: "type.googleapis.com/sslsim.RobotSpecErForce",
 		Value:   customErForceSerialized,
 	})
 	return
