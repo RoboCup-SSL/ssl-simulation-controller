@@ -5,12 +5,33 @@
 
 # ssl-simulation-controller
 
-A controller for SSL simulation tournaments, that:
- * places the ball automatically, if it can not be placed by the teams
- * Adds and removes robots, if the robot count does not match the max robot count in the referee message
-   * During gameplay, if the [conditions](https://robocup-ssl.github.io/ssl-rules/sslrules.html#_robot_substitution) are met
-   * During halt by selecting robots nearest to either crossing of half-way line and touch line)
- * TODO: Set robot limits based on some configuration
+A controller for SSL simulation tournaments.
+
+## Behaviors
+
+### Manual ball placement
+The ball is manually moved to the designated target position,
+if the game is in HALT for at least 0.5s.
+
+### Maintain robot count
+Adds and removes robots, if the robot count does not match the max robot count in the referee message:
+* The [robot substitution rules](https://robocup-ssl.github.io/ssl-rules/sslrules.html#_robot_substitution) are applied as far as possible.
+* Robots are only added or removed, if the game is either in HALT, or the ball is not within 2m to the halfway line (see robot substitution rules).
+* Robots are put near the halfway line at a free position.
+* Robots nearest to either crossing of halfway line and touch lines are removed first.
+
+### Apply Geometry
+The geometry for division A or B is applied, based on the max number of robots in the referee message.
+The geometry is currently hard-coded into the binary.
+It will only be applied in `NORMAL_FIRST_HALF_PRE` stage.
+
+### Apply robot specs
+Send the robot specs for the respective teams to the simulator:
+* The robot specs are taken from a config file specified via command line. There is also an example config in [config/robot-specs.yaml](config/robot-specs.yaml).
+* The team names are taken from the referee message and must match exactly with the keys in the config file.
+* Robot specs are only applied during pre-stages.
+* The simulator will receive equal robot specs for all 16 robots in one message.
+* Robot specs are only send once on startup and when a team changes. The simulator-controller will not resend the specs after a simulator crash and must be restarted, or the team name must be switched to force resending the specs.
 
 ## Usage
 If you just want to use this app, simply download the latest [release binary](https://github.com/RoboCup-SSL/ssl-simulation-controller/releases/latest).
