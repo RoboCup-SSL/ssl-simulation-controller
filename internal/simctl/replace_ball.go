@@ -48,6 +48,7 @@ func (r *BallReplacer) handleReplaceBall() {
 
 	balls := r.c.lastTrackedFrame.TrackedFrame.Balls
 	if len(balls) == 0 {
+		log.Printf("Ball vanished. Placing ball to %v", targetPos)
 		r.placeBall(targetPos)
 		return
 	}
@@ -55,12 +56,12 @@ func (r *BallReplacer) handleReplaceBall() {
 	currentPos := geom.NewVector2Float32(*balls[0].Pos.X, *balls[0].Pos.Y)
 
 	if targetPos.DistanceTo(currentPos) > 0.1 {
+		log.Printf("Placing ball from %v to %v", currentPos, targetPos)
 		r.placeBall(targetPos)
 	}
 }
 
 func (r *BallReplacer) placeBall(ballPos *geom.Vector2) {
-	log.Printf("Placing ball to %v", ballPos)
 
 	zero := float32(0)
 	command := SimulatorCommand{
