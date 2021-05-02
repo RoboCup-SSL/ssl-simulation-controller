@@ -15,7 +15,7 @@ var geometryConfigDivA string
 //go:embed geometry-div-b.txt
 var geometryConfigDivB string
 
-type GeometrySetter struct {
+type GeometryHandler struct {
 	c *SimulationController
 
 	geometryDivA *vision.SSL_GeometryData
@@ -23,18 +23,18 @@ type GeometrySetter struct {
 	timeLastSent *time.Time
 }
 
-func NewGeometrySetter(c *SimulationController) (r *GeometrySetter) {
-	r = new(GeometrySetter)
+func NewGeometryHandler(c *SimulationController) (r *GeometryHandler) {
+	r = new(GeometryHandler)
 	r.c = c
 	r.loadGeometry()
 	return r
 }
 
-func (r *GeometrySetter) Reset() {
+func (r *GeometryHandler) Reset() {
 	r.timeLastSent = nil
 }
 
-func (r *GeometrySetter) loadGeometry() {
+func (r *GeometryHandler) loadGeometry() {
 	r.geometryDivA = new(vision.SSL_GeometryData)
 	if err := proto.UnmarshalText(geometryConfigDivA, r.geometryDivA); err != nil {
 		log.Println("Could not unmarshal geometry file: ", err)
@@ -45,7 +45,7 @@ func (r *GeometrySetter) loadGeometry() {
 	}
 }
 
-func (r *GeometrySetter) handleGeometry() {
+func (r *GeometryHandler) handleGeometry() {
 	if *r.c.lastRefereeMsg.Stage != referee.Referee_NORMAL_FIRST_HALF_PRE {
 		// Only before the game starts
 		return
@@ -71,7 +71,7 @@ func (r *GeometrySetter) handleGeometry() {
 	}
 }
 
-func (r *GeometrySetter) sendConfig(geometry *vision.SSL_GeometryData) {
+func (r *GeometryHandler) sendConfig(geometry *vision.SSL_GeometryData) {
 	log.Printf("Sending geometry %v", geometry)
 
 	command := SimulatorCommand{

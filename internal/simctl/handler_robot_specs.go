@@ -39,25 +39,25 @@ type CustomRobotSpecErForce struct {
 	DribblerWidth  float32 `yaml:"dribbler_width"`
 }
 
-type RobotSpecSetter struct {
+type RobotSpecHandler struct {
 	c *SimulationController
 
 	teamRobotSpecs TeamRobotSpecs
 	appliedTeams   map[referee.Team]string
 }
 
-func NewRobotSpecSetter(c *SimulationController, configFile string) (r *RobotSpecSetter) {
-	r = new(RobotSpecSetter)
+func NewRobotSpecHandler(c *SimulationController, configFile string) (r *RobotSpecHandler) {
+	r = new(RobotSpecHandler)
 	r.c = c
 	r.loadRobotSpecs(configFile)
 	return r
 }
 
-func (r *RobotSpecSetter) Reset() {
+func (r *RobotSpecHandler) Reset() {
 	r.appliedTeams = map[referee.Team]string{}
 }
 
-func (r *RobotSpecSetter) loadRobotSpecs(configFile string) {
+func (r *RobotSpecHandler) loadRobotSpecs(configFile string) {
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		log.Println("Could not read robot spec file: ", err)
@@ -66,7 +66,7 @@ func (r *RobotSpecSetter) loadRobotSpecs(configFile string) {
 	}
 }
 
-func (r *RobotSpecSetter) handleRobotSpecs() {
+func (r *RobotSpecHandler) handleRobotSpecs() {
 	switch *r.c.lastRefereeMsg.Stage {
 	case referee.Referee_NORMAL_FIRST_HALF_PRE,
 		referee.Referee_NORMAL_SECOND_HALF_PRE,
@@ -82,7 +82,7 @@ func (r *RobotSpecSetter) handleRobotSpecs() {
 	r.updateTeam(referee.Team_YELLOW, *r.c.lastRefereeMsg.Yellow.Name)
 }
 
-func (r *RobotSpecSetter) updateTeam(team referee.Team, teamName string) {
+func (r *RobotSpecHandler) updateTeam(team referee.Team, teamName string) {
 	if r.appliedTeams[team] != teamName {
 		if spec, ok := r.teamRobotSpecs.Teams[teamName]; ok {
 			var protoSpecs []*RobotSpecs
@@ -101,7 +101,7 @@ func (r *RobotSpecSetter) updateTeam(team referee.Team, teamName string) {
 	}
 }
 
-func (r *RobotSpecSetter) sendConfig(robotSpec []*RobotSpecs) {
+func (r *RobotSpecHandler) sendConfig(robotSpec []*RobotSpecs) {
 	log.Printf("Sending robot spec %v", robotSpec)
 
 	command := SimulatorCommand{

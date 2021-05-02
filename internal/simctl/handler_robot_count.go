@@ -11,27 +11,27 @@ import (
 	"time"
 )
 
-type RobotCountMaintainer struct {
+type RobotCountHandler struct {
 	c *SimulationController
 
 	lastTimeSendCommand     time.Time
 	robotCountMismatchSince map[referee.Team]time.Time
 }
 
-func NewRobotCountMaintainer(c *SimulationController) (r *RobotCountMaintainer) {
-	r = new(RobotCountMaintainer)
+func NewRobotCountHandler(c *SimulationController) (r *RobotCountHandler) {
+	r = new(RobotCountHandler)
 	r.c = c
 	return r
 }
 
-func (r *RobotCountMaintainer) Reset() {
+func (r *RobotCountHandler) Reset() {
 	r.lastTimeSendCommand = time.Now()
 	r.robotCountMismatchSince = map[referee.Team]time.Time{}
 	r.robotCountMismatchSince[referee.Team_BLUE] = time.Time{}
 	r.robotCountMismatchSince[referee.Team_YELLOW] = time.Time{}
 }
 
-func (r *RobotCountMaintainer) handleRobotCount() {
+func (r *RobotCountHandler) handleRobotCount() {
 
 	if time.Now().Sub(r.lastTimeSendCommand) < 500*time.Millisecond {
 		// Placed ball just recently
@@ -59,7 +59,7 @@ func (r *RobotCountMaintainer) handleRobotCount() {
 	r.updateRobotCount(yellowRobots, int(*r.c.lastRefereeMsg.Yellow.MaxAllowedBots), referee.Team_YELLOW)
 }
 
-func (r *RobotCountMaintainer) updateRobotCount(robots []*tracker.TrackedRobot, maxRobots int, team referee.Team) {
+func (r *RobotCountHandler) updateRobotCount(robots []*tracker.TrackedRobot, maxRobots int, team referee.Team) {
 	substCenterPos := geom.NewVector2(0, float64(*r.c.fieldSize.FieldWidth)/2000+float64(*r.c.fieldSize.BoundaryWidth)/2000.0-0.1)
 	substCenterNeg := geom.NewVector2Float32(0, -*substCenterPos.Y)
 	substRectPos := geom.NewRectangleFromCenter(substCenterPos, 2, float64(*r.c.fieldSize.BoundaryWidth)/1000+0.2)
@@ -106,7 +106,7 @@ func (r *RobotCountMaintainer) updateRobotCount(robots []*tracker.TrackedRobot, 
 	}
 }
 
-func (r *RobotCountMaintainer) nextFreeRobotId(team referee.Team) *referee.RobotId {
+func (r *RobotCountHandler) nextFreeRobotId(team referee.Team) *referee.RobotId {
 	for i := 0; i < 16; i++ {
 		id := uint32(i)
 		robotId := &referee.RobotId{
@@ -120,7 +120,7 @@ func (r *RobotCountMaintainer) nextFreeRobotId(team referee.Team) *referee.Robot
 	return nil
 }
 
-func (r *RobotCountMaintainer) isRobotIdFree(id *referee.RobotId) bool {
+func (r *RobotCountHandler) isRobotIdFree(id *referee.RobotId) bool {
 
 	for _, robot := range r.c.lastTrackedFrame.TrackedFrame.Robots {
 		if *robot.RobotId.Id == *id.Id && *robot.RobotId.Team == *id.Team {
@@ -130,7 +130,7 @@ func (r *RobotCountMaintainer) isRobotIdFree(id *referee.RobotId) bool {
 	return true
 }
 
-func (r *RobotCountMaintainer) isFreeOfObstacles(pos *geom.Vector2) bool {
+func (r *RobotCountHandler) isFreeOfObstacles(pos *geom.Vector2) bool {
 	for _, robot := range r.c.lastTrackedFrame.TrackedFrame.Robots {
 		if robot.Pos.DistanceTo(pos) < 0.2 {
 			return false
@@ -145,7 +145,7 @@ func (r *RobotCountMaintainer) isFreeOfObstacles(pos *geom.Vector2) bool {
 	return true
 }
 
-func (r *RobotCountMaintainer) sortRobotsByDistanceToSubstitutionPos(robots []*tracker.TrackedRobot) {
+func (r *RobotCountHandler) sortRobotsByDistanceToSubstitutionPos(robots []*tracker.TrackedRobot) {
 	negSubstPos := geom.NewVector2(0, -float64(*r.c.fieldSize.FieldWidth)/2000)
 	posSubstPos := geom.NewVector2(0, +float64(*r.c.fieldSize.FieldWidth)/2000)
 	sort.Slice(robots, func(i, j int) bool {
@@ -155,7 +155,7 @@ func (r *RobotCountMaintainer) sortRobotsByDistanceToSubstitutionPos(robots []*t
 	})
 }
 
-func (r *RobotCountMaintainer) removeRobot(id *referee.RobotId) {
+func (r *RobotCountHandler) removeRobot(id *referee.RobotId) {
 	log.Printf("Remove robot %v", id)
 
 	present := false
@@ -173,7 +173,7 @@ func (r *RobotCountMaintainer) removeRobot(id *referee.RobotId) {
 	r.sendControlCommand(&command)
 }
 
-func (r *RobotCountMaintainer) addRobot(id *referee.RobotId, pos *geom.Vector2) {
+func (r *RobotCountHandler) addRobot(id *referee.RobotId, pos *geom.Vector2) {
 	log.Printf("Add robot %v @ %v", id, pos)
 
 	present := true
@@ -195,7 +195,7 @@ func (r *RobotCountMaintainer) addRobot(id *referee.RobotId, pos *geom.Vector2) 
 	r.sendControlCommand(&command)
 }
 
-func (r *RobotCountMaintainer) sendControlCommand(command *SimulatorCommand) {
+func (r *RobotCountHandler) sendControlCommand(command *SimulatorCommand) {
 
 	if data, err := proto.Marshal(command); err != nil {
 		log.Println("Could not marshal command: ", err)

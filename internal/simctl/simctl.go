@@ -27,10 +27,10 @@ type SimulationController struct {
 	fieldSize          *vision.SSL_GeometryFieldSize
 	lastVisionFrameIds map[uint32]uint32
 
-	ballReplacer         *BallReplacer
-	robotCountMaintainer *RobotCountMaintainer
-	robotSpecsSetter     *RobotSpecSetter
-	geometrySetter       *GeometrySetter
+	ballReplaceHandler *BallReplaceHandler
+	robotCountHandler  *RobotCountHandler
+	robotSpecsHandler  *RobotSpecHandler
+	geometryHandler    *GeometryHandler
 }
 
 func NewSimulationController(visionAddress, refereeAddress, trackerAddress, simControlPort, robotSpecConfig string) (c *SimulationController) {
@@ -42,15 +42,15 @@ func NewSimulationController(visionAddress, refereeAddress, trackerAddress, simC
 	c.simulatorRestarted = true
 	c.lastVisionFrameIds = map[uint32]uint32{}
 
-	c.ballReplacer = NewBallReplacer(c)
-	c.robotCountMaintainer = NewRobotCountMaintainer(c)
-	c.robotSpecsSetter = NewRobotSpecSetter(c, robotSpecConfig)
-	c.geometrySetter = NewGeometrySetter(c)
+	c.ballReplaceHandler = NewBallReplaceHandler(c)
+	c.robotCountHandler = NewRobotCountHandler(c)
+	c.robotSpecsHandler = NewRobotSpecHandler(c, robotSpecConfig)
+	c.geometryHandler = NewGeometryHandler(c)
 
-	c.ballReplacer.c = c
-	c.robotCountMaintainer.c = c
-	c.robotSpecsSetter.c = c
-	c.geometrySetter.c = c
+	c.ballReplaceHandler.c = c
+	c.robotCountHandler.c = c
+	c.robotSpecsHandler.c = c
+	c.geometryHandler.c = c
 	return
 }
 
@@ -138,17 +138,17 @@ func (c *SimulationController) handle() {
 	}
 
 	if c.simulatorRestarted {
-		c.ballReplacer.Reset()
-		c.robotCountMaintainer.Reset()
-		c.robotSpecsSetter.Reset()
-		c.geometrySetter.Reset()
+		c.ballReplaceHandler.Reset()
+		c.robotCountHandler.Reset()
+		c.robotSpecsHandler.Reset()
+		c.geometryHandler.Reset()
 		c.simulatorRestarted = false
 	}
 
-	c.ballReplacer.handleReplaceBall()
-	c.robotCountMaintainer.handleRobotCount()
-	c.robotSpecsSetter.handleRobotSpecs()
-	c.geometrySetter.handleGeometry()
+	c.ballReplaceHandler.handleReplaceBall()
+	c.robotCountHandler.handleRobotCount()
+	c.robotSpecsHandler.handleRobotSpecs()
+	c.geometryHandler.handleGeometry()
 }
 
 func (c *SimulationController) Start() {

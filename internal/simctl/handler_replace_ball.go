@@ -8,25 +8,25 @@ import (
 	"time"
 )
 
-type BallReplacer struct {
+type BallReplaceHandler struct {
 	c *SimulationController
 
 	lastTimePlacedBall time.Time
 	haltTime           *time.Time
 }
 
-func NewBallReplacer(c *SimulationController) (r *BallReplacer) {
-	r = new(BallReplacer)
+func NewBallReplaceHandler(c *SimulationController) (r *BallReplaceHandler) {
+	r = new(BallReplaceHandler)
 	r.c = c
 	return r
 }
 
-func (r *BallReplacer) Reset() {
+func (r *BallReplaceHandler) Reset() {
 	r.lastTimePlacedBall = time.Time{}
 	r.haltTime = nil
 }
 
-func (r *BallReplacer) handleReplaceBall() {
+func (r *BallReplaceHandler) handleReplaceBall() {
 	if *r.c.lastRefereeMsg.Command != referee.Referee_HALT {
 		// Only during HALT
 		r.haltTime = nil
@@ -72,7 +72,7 @@ func (r *BallReplacer) handleReplaceBall() {
 	}
 }
 
-func (r *BallReplacer) placeBall(ballPos *geom.Vector2) {
+func (r *BallReplaceHandler) placeBall(ballPos *geom.Vector2) {
 
 	zero := float32(0)
 	command := SimulatorCommand{
