@@ -15,6 +15,17 @@ type BallReplacer struct {
 	haltTime           *time.Time
 }
 
+func NewBallReplacer(c *SimulationController) (r *BallReplacer) {
+	r = new(BallReplacer)
+	r.c = c
+	return r
+}
+
+func (r *BallReplacer) Reset() {
+	r.lastTimePlacedBall = time.Time{}
+	r.haltTime = nil
+}
+
 func (r *BallReplacer) handleReplaceBall() {
 	if *r.c.lastRefereeMsg.Command != referee.Referee_HALT {
 		// Only during HALT

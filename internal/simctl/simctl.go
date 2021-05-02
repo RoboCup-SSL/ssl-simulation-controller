@@ -7,7 +7,9 @@ import (
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/vision"
 	"github.com/golang/protobuf/proto"
 	"log"
+	"math"
 	"net"
+	"sync"
 )
 
 type SimulationController struct {
@@ -15,17 +17,20 @@ type SimulationController struct {
 	refereeServer    *sslnet.MulticastServer
 	trackerServer    *sslnet.MulticastServer
 	simControlClient *sslnet.UdpClient
+	mutex            sync.Mutex
 
-	simControlPort string
+	simControlPort     string
+	simulatorRestarted bool
 
-	lastTrackedFrame *tracker.TrackerWrapperPacket
-	lastRefereeMsg   *referee.Referee
-	fieldSize        *vision.SSL_GeometryFieldSize
+	lastTrackedFrame   *tracker.TrackerWrapperPacket
+	lastRefereeMsg     *referee.Referee
+	fieldSize          *vision.SSL_GeometryFieldSize
+	lastVisionFrameIds map[uint32]uint32
 
-	ballReplacer         BallReplacer
-	robotCountMaintainer RobotCountMaintainer
-	robotSpecsSetter     RobotSpecSetter
-	geometrySetter       GeometrySetter
+	ballReplacer         *BallReplacer
+	robotCountMaintainer *RobotCountMaintainer
+	robotSpecsSetter     *RobotSpecSetter
+	geometrySetter       *GeometrySetter
 }
 
 func NewSimulationController(visionAddress, refereeAddress, trackerAddress, simControlPort, robotSpecConfig string) (c *SimulationController) {
@@ -34,12 +39,18 @@ func NewSimulationController(visionAddress, refereeAddress, trackerAddress, simC
 	c.refereeServer = sslnet.NewMulticastServer(refereeAddress, c.onNewRefereeData)
 	c.trackerServer = sslnet.NewMulticastServer(trackerAddress, c.onNewTrackerData)
 	c.simControlPort = simControlPort
+	c.simulatorRestarted = true
+	c.lastVisionFrameIds = map[uint32]uint32{}
+
+	c.ballReplacer = NewBallReplacer(c)
+	c.robotCountMaintainer = NewRobotCountMaintainer(c)
+	c.robotSpecsSetter = NewRobotSpecSetter(c, robotSpecConfig)
+	c.geometrySetter = NewGeometrySetter(c)
+
 	c.ballReplacer.c = c
 	c.robotCountMaintainer.c = c
 	c.robotSpecsSetter.c = c
-	c.robotSpecsSetter.LoadRobotSpecs(robotSpecConfig)
 	c.geometrySetter.c = c
-	c.geometrySetter.LoadGeometry()
 	return
 }
 
@@ -51,7 +62,24 @@ func (c *SimulationController) onNewVisionData(data []byte, remoteAddr *net.UDPA
 	}
 
 	if wrapper.Geometry != nil && wrapper.Geometry.Field != nil {
+		c.mutex.Lock()
 		c.fieldSize = wrapper.Geometry.Field
+		c.mutex.Unlock()
+	}
+
+	if wrapper.Detection != nil {
+		c.mutex.Lock()
+		frameId := *wrapper.Detection.FrameNumber
+		lastFrameId, lastFrameIdPresent := c.lastVisionFrameIds[*wrapper.Detection.CameraId]
+		if lastFrameIdPresent && math.Abs(float64(frameId-lastFrameId)) > 100 {
+			// large frame id change: Simulator probably restarted
+			c.simulatorRestarted = true
+			c.lastVisionFrameIds = map[uint32]uint32{}
+			log.Printf("Simulator restart detected due to high frame id change (%d -> %d)",
+				lastFrameId, frameId)
+		}
+		c.lastVisionFrameIds[*wrapper.Detection.CameraId] = frameId
+		c.mutex.Unlock()
 	}
 
 	if c.simControlClient == nil {
@@ -68,7 +96,9 @@ func (c *SimulationController) onNewRefereeData(data []byte, _ *net.UDPAddr) {
 		log.Println("Could not unmarshal referee packet", err)
 		return
 	}
+	c.mutex.Lock()
 	c.lastRefereeMsg = refereeMsg
+	c.mutex.Unlock()
 }
 
 func (c *SimulationController) onNewTrackerData(data []byte, _ *net.UDPAddr) {
@@ -81,8 +111,10 @@ func (c *SimulationController) onNewTrackerData(data []byte, _ *net.UDPAddr) {
 		*c.lastTrackedFrame.Uuid == *frame.Uuid || // frame from same origin
 		// new frame is significantly newer than last frame
 		(*frame.TrackedFrame.Timestamp-*c.lastTrackedFrame.TrackedFrame.Timestamp) > 5 {
+		c.mutex.Lock()
 		c.lastTrackedFrame = frame
 		c.handle()
+		c.mutex.Unlock()
 	}
 }
 
@@ -103,6 +135,14 @@ func (c *SimulationController) handle() {
 		c.lastRefereeMsg == nil ||
 		c.simControlClient == nil {
 		return
+	}
+
+	if c.simulatorRestarted {
+		c.ballReplacer.Reset()
+		c.robotCountMaintainer.Reset()
+		c.robotSpecsSetter.Reset()
+		c.geometrySetter.Reset()
+		c.simulatorRestarted = false
 	}
 
 	c.ballReplacer.handleReplaceBall()

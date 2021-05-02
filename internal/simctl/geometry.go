@@ -23,7 +23,18 @@ type GeometrySetter struct {
 	timeLastSent *time.Time
 }
 
-func (r *GeometrySetter) LoadGeometry() {
+func NewGeometrySetter(c *SimulationController) (r *GeometrySetter) {
+	r = new(GeometrySetter)
+	r.c = c
+	r.loadGeometry()
+	return r
+}
+
+func (r *GeometrySetter) Reset() {
+	r.timeLastSent = nil
+}
+
+func (r *GeometrySetter) loadGeometry() {
 	r.geometryDivA = new(vision.SSL_GeometryData)
 	if err := proto.UnmarshalText(geometryConfigDivA, r.geometryDivA); err != nil {
 		log.Println("Could not unmarshal geometry file: ", err)

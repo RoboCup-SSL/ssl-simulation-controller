@@ -46,14 +46,24 @@ type RobotSpecSetter struct {
 	appliedTeams   map[referee.Team]string
 }
 
-func (r *RobotSpecSetter) LoadRobotSpecs(configFile string) {
+func NewRobotSpecSetter(c *SimulationController, configFile string) (r *RobotSpecSetter) {
+	r = new(RobotSpecSetter)
+	r.c = c
+	r.loadRobotSpecs(configFile)
+	return r
+}
+
+func (r *RobotSpecSetter) Reset() {
+	r.appliedTeams = map[referee.Team]string{}
+}
+
+func (r *RobotSpecSetter) loadRobotSpecs(configFile string) {
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		log.Println("Could not read robot spec file: ", err)
 	} else if err := yaml.Unmarshal(data, &r.teamRobotSpecs); err != nil {
 		log.Println("Could not unmarshal robot spec file: ", err)
 	}
-	r.appliedTeams = map[referee.Team]string{}
 }
 
 func (r *RobotSpecSetter) handleRobotSpecs() {

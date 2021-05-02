@@ -16,10 +16,15 @@ type RobotCountMaintainer struct {
 
 	lastTimeSendCommand     time.Time
 	robotCountMismatchSince map[referee.Team]time.Time
-	lastUpdate              time.Time
 }
 
-func (r *RobotCountMaintainer) init() {
+func NewRobotCountMaintainer(c *SimulationController) (r *RobotCountMaintainer) {
+	r = new(RobotCountMaintainer)
+	r.c = c
+	return r
+}
+
+func (r *RobotCountMaintainer) Reset() {
 	r.lastTimeSendCommand = time.Now()
 	r.robotCountMismatchSince = map[referee.Team]time.Time{}
 	r.robotCountMismatchSince[referee.Team_BLUE] = time.Time{}
@@ -27,13 +32,6 @@ func (r *RobotCountMaintainer) init() {
 }
 
 func (r *RobotCountMaintainer) handleRobotCount() {
-
-	preLastUpdate := r.lastUpdate
-	r.lastUpdate = time.Now()
-	if r.lastUpdate.Sub(preLastUpdate) > time.Second {
-		// First update since a second, probably a simulator restart
-		r.init()
-	}
 
 	if time.Now().Sub(r.lastTimeSendCommand) < 500*time.Millisecond {
 		// Placed ball just recently
