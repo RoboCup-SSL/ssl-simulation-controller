@@ -2,7 +2,7 @@ field: <
   field_length: 9000
   field_width: 6000
   goal_width: 1000
-  goal_depth: 180
+  goal_depth: 300
   boundary_width: 300
   field_lines: <
     name: "TopTouchLine"
