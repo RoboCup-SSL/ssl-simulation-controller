@@ -1,6 +1,7 @@
 FROM golang:1.16-alpine AS build
 WORKDIR /go/src/github.com/RoboCup-SSL/ssl-simulation-controller
 COPY go.mod go.mod
+COPY go.sum go.sum
 RUN go mod download
 COPY cmd cmd
 COPY internal internal
