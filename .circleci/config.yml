@@ -47,7 +47,8 @@ jobs:
       - setup_remote_docker:
           version: 20.10.6
       - run: |
-          TAG=${${CIRCLE_TAG:1}:-latest}
+          TAG=${CIRCLE_TAG:1}
+          TAG=${TAG:-latest}
           docker build -t robocupssl/ssl-simulation-controller:$TAG .
           docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
           docker push robocupssl/ssl-simulation-controller:$TAG
