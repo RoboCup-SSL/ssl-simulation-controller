@@ -3,7 +3,7 @@ package simctl
 import (
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/geom"
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/referee"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"time"
 )

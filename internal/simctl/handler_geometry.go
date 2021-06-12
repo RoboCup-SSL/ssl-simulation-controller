@@ -4,7 +4,8 @@ import (
 	_ "embed"
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/referee"
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/vision"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/encoding/prototext"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"time"
 )
@@ -36,11 +37,11 @@ func (r *GeometryHandler) Reset() {
 
 func (r *GeometryHandler) loadGeometry() {
 	r.geometryDivA = new(vision.SSL_GeometryData)
-	if err := proto.UnmarshalText(geometryConfigDivA, r.geometryDivA); err != nil {
+	if err := prototext.Unmarshal([]byte(geometryConfigDivA), r.geometryDivA); err != nil {
 		log.Println("Could not unmarshal geometry file: ", err)
 	}
 	r.geometryDivB = new(vision.SSL_GeometryData)
-	if err := proto.UnmarshalText(geometryConfigDivB, r.geometryDivB); err != nil {
+	if err := prototext.Unmarshal([]byte(geometryConfigDivB), r.geometryDivB); err != nil {
 		log.Println("Could not unmarshal geometry file: ", err)
 	}
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/geom"
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/referee"
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/tracker"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"math"
 	"sort"

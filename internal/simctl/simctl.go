@@ -5,7 +5,7 @@ import (
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/sslnet"
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/tracker"
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/vision"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"math"
 	"net"

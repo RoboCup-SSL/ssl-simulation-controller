@@ -2,8 +2,8 @@ package simctl
 
 import (
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/referee"
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes/any"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -135,7 +135,7 @@ func mapRobotSpec(spec RobotSpec) (protoSpec *RobotSpecs) {
 		log.Println("Could not serialize custom ER-Force robot specs: ", err)
 	}
 	customErForce.ProtoReflect().Descriptor().FullName()
-	protoSpec.Custom = append(protoSpec.Custom, &any.Any{
+	protoSpec.Custom = append(protoSpec.Custom, &anypb.Any{
 		TypeUrl: "type.googleapis.com/sslsim.RobotSpecErForce",
 		Value:   customErForceSerialized,
 	})
