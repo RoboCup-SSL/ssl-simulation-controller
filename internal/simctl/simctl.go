@@ -33,11 +33,14 @@ type SimulationController struct {
 	geometryHandler    *GeometryHandler
 }
 
-func NewSimulationController(visionAddress, refereeAddress, trackerAddress, simControlPort, robotSpecConfig string) (c *SimulationController) {
+func NewSimulationController(visionAddress, refereeAddress, trackerAddress, simControlPort, robotSpecConfig string, verbose bool) (c *SimulationController) {
 	c = new(SimulationController)
 	c.visionServer = sslnet.NewMulticastServer(visionAddress, c.onNewVisionData)
 	c.refereeServer = sslnet.NewMulticastServer(refereeAddress, c.onNewRefereeData)
 	c.trackerServer = sslnet.NewMulticastServer(trackerAddress, c.onNewTrackerData)
+	c.visionServer.Verbose = verbose
+	c.refereeServer.Verbose = verbose
+	c.trackerServer.Verbose = verbose
 	c.simControlPort = simControlPort
 	c.simulatorRestarted = true
 	c.lastVisionFrameIds = map[uint32]uint32{}
