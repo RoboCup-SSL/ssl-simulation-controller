@@ -84,20 +84,29 @@ func (r *RobotSpecHandler) handleRobotSpecs() {
 func (r *RobotSpecHandler) updateTeam(team referee.Team, teamName string) {
 	if r.appliedTeams[team] != teamName {
 		if spec, ok := r.teamRobotSpecs.Teams[teamName]; ok {
-			var protoSpecs []*RobotSpecs
-			for id := 0; id < 16; id++ {
-				protoSpec := mapRobotSpec(spec)
-				protoSpec.Id = new(referee.RobotId)
-				protoSpec.Id.Id = new(uint32)
-				protoSpec.Id.Team = new(referee.Team)
-				*protoSpec.Id.Team = team
-				*protoSpec.Id.Id = uint32(id)
-				protoSpecs = append(protoSpecs, protoSpec)
-			}
-			r.sendConfig(protoSpecs)
-			r.appliedTeams[team] = teamName
+			r.applySpecs(team, teamName, spec)
+		} else if spec, ok := r.teamRobotSpecs.Teams["Unknown"]; ok {
+			log.Printf("Team %v not found, using fallback", teamName)
+			r.applySpecs(team, teamName, spec)
+		} else {
+			log.Printf("Team %v not found and also no fallback found", teamName)
 		}
 	}
+}
+
+func (r *RobotSpecHandler) applySpecs(team referee.Team, teamName string, spec RobotSpec) {
+	var protoSpecs []*RobotSpecs
+	for id := 0; id < 16; id++ {
+		protoSpec := mapRobotSpec(spec)
+		protoSpec.Id = new(referee.RobotId)
+		protoSpec.Id.Id = new(uint32)
+		protoSpec.Id.Team = new(referee.Team)
+		*protoSpec.Id.Team = team
+		*protoSpec.Id.Id = uint32(id)
+		protoSpecs = append(protoSpecs, protoSpec)
+	}
+	r.sendConfig(protoSpecs)
+	r.appliedTeams[team] = teamName
 }
 
 func (r *RobotSpecHandler) sendConfig(robotSpec []*RobotSpecs) {
