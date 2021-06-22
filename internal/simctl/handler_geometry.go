@@ -47,8 +47,8 @@ func (r *GeometryHandler) loadGeometry() {
 }
 
 func (r *GeometryHandler) handleGeometry() {
-	if *r.c.lastRefereeMsg.Stage != referee.Referee_NORMAL_FIRST_HALF_PRE {
-		// Only before the game starts
+	if *r.c.lastRefereeMsg.Command != referee.Referee_HALT {
+		// Only during HALT
 		return
 	}
 
@@ -57,7 +57,7 @@ func (r *GeometryHandler) handleGeometry() {
 		return
 	}
 
-	maxBots := *r.c.lastRefereeMsg.Yellow.MaxAllowedBots
+	maxBots := int(*r.c.lastRefereeMsg.Yellow.MaxAllowedBots) + len(r.c.lastRefereeMsg.Yellow.YellowCardTimes)
 	var geometry *vision.SSL_GeometryData
 	if maxBots == 6 {
 		geometry = r.geometryDivB
