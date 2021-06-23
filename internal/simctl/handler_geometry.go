@@ -57,7 +57,9 @@ func (r *GeometryHandler) handleGeometry() {
 		return
 	}
 
-	maxBots := int(*r.c.lastRefereeMsg.Yellow.MaxAllowedBots) + len(r.c.lastRefereeMsg.Yellow.YellowCardTimes)
+	maxBots := int(*r.c.lastRefereeMsg.Yellow.MaxAllowedBots) +
+		len(r.c.lastRefereeMsg.Yellow.YellowCardTimes) +
+		int(*r.c.lastRefereeMsg.Yellow.RedCards)
 	var geometry *vision.SSL_GeometryData
 	if maxBots == 6 {
 		geometry = r.geometryDivB
