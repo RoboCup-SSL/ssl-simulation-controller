@@ -56,7 +56,7 @@ func (r *RobotCountHandler) handleRobotCount() {
 	}
 
 	maxBlueRobots := int(*r.c.lastRefereeMsg.Blue.MaxAllowedBots)
-	maxYellowRobots := int(*r.c.lastRefereeMsg.Blue.MaxAllowedBots)
+	maxYellowRobots := int(*r.c.lastRefereeMsg.Yellow.MaxAllowedBots)
 
 	switch *r.c.lastRefereeMsg.Stage {
 	case referee.Referee_PENALTY_SHOOTOUT, referee.Referee_PENALTY_SHOOTOUT_BREAK:
