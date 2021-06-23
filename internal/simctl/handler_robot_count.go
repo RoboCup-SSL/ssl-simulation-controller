@@ -39,6 +39,7 @@ func (r *RobotCountHandler) handleRobotCount() {
 	}
 
 	if *r.c.lastRefereeMsg.Command != referee.Referee_HALT &&
+		*r.c.lastRefereeMsg.Command != referee.Referee_STOP &&
 		len(r.c.lastTrackedFrame.TrackedFrame.Balls) > 0 &&
 		math.Abs(float64(*r.c.lastTrackedFrame.TrackedFrame.Balls[0].Pos.X)) < 2 {
 		// Rule: The ball must be at least 2 meters away from the halfway line.
