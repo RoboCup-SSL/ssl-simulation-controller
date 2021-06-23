@@ -55,8 +55,17 @@ func (r *RobotCountHandler) handleRobotCount() {
 		}
 	}
 
-	r.updateRobotCount(blueRobots, int(*r.c.lastRefereeMsg.Blue.MaxAllowedBots), referee.Team_BLUE)
-	r.updateRobotCount(yellowRobots, int(*r.c.lastRefereeMsg.Yellow.MaxAllowedBots), referee.Team_YELLOW)
+	maxBlueRobots := int(*r.c.lastRefereeMsg.Blue.MaxAllowedBots)
+	maxYellowRobots := int(*r.c.lastRefereeMsg.Blue.MaxAllowedBots)
+
+	switch *r.c.lastRefereeMsg.Stage {
+	case referee.Referee_PENALTY_SHOOTOUT, referee.Referee_PENALTY_SHOOTOUT_BREAK:
+		maxBlueRobots = 2
+		maxYellowRobots = 2
+	}
+
+	r.updateRobotCount(blueRobots, maxBlueRobots, referee.Team_BLUE)
+	r.updateRobotCount(yellowRobots, maxYellowRobots, referee.Team_YELLOW)
 }
 
 func (r *RobotCountHandler) updateRobotCount(robots []*tracker.TrackedRobot, maxRobots int, team referee.Team) {
