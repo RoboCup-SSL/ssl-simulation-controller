@@ -2,7 +2,7 @@ version: 2
 jobs:
   app:
     docker:
-      - image: circleci/golang:1.16
+      - image: circleci/golang:1.17
 
     working_directory: /go/src/github.com/RoboCup-SSL/ssl-simulation-controller
     steps:
@@ -22,7 +22,7 @@ jobs:
 
   publish-github-release:
     docker:
-      - image: circleci/golang:1.16
+      - image: circleci/golang:1.17
     steps:
       - attach_workspace:
           at: .
