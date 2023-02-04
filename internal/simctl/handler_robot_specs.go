@@ -5,8 +5,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"log"
+	"os"
 )
 
 type TeamRobotSpecs struct {
@@ -45,9 +45,35 @@ type RobotSpecHandler struct {
 	appliedTeams   map[referee.Team]string
 }
 
+var defaultRobotSpecs = TeamRobotSpecs{
+	Teams: map[string]RobotSpec{
+		"Unknown": {
+			Radius:             0.09,
+			Height:             0.143,
+			Mass:               2.7,
+			MaxLinearKickSpeed: 6,
+			MaxChipKickSpeed:   6,
+			CenterToDribbler:   0.078,
+			Limits: Limits{
+				AccSpeedupAbsoluteMax: 2,
+				AccSpeedupAngularMax:  20,
+				AccBrakeAbsoluteMax:   2,
+				AccBrakeAngularMax:    20,
+				VelAbsoluteMax:        2,
+				VelAngularMax:         5,
+			},
+			CustomErforce: CustomRobotSpecErForce{
+				ShootRadius:   0.0715,
+				DribblerWidth: 0.065,
+			},
+		},
+	},
+}
+
 func NewRobotSpecHandler(c *SimulationController, configFile string) (r *RobotSpecHandler) {
 	r = new(RobotSpecHandler)
 	r.c = c
+	r.teamRobotSpecs = defaultRobotSpecs
 	r.loadRobotSpecs(configFile)
 	return r
 }
@@ -57,7 +83,7 @@ func (r *RobotSpecHandler) Reset() {
 }
 
 func (r *RobotSpecHandler) loadRobotSpecs(configFile string) {
-	data, err := ioutil.ReadFile(configFile)
+	data, err := os.ReadFile(configFile)
 	if err != nil {
 		log.Println("Could not read robot spec file: ", err)
 	} else if err := yaml.Unmarshal(data, &r.teamRobotSpecs); err != nil {
