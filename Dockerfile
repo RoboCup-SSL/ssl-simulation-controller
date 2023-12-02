@@ -8,7 +8,7 @@ COPY internal internal
 RUN go install ./...
 
 # Start fresh from a smaller image
-FROM alpine:3.15
+FROM alpine:3.18
 COPY --from=build /go/bin/ssl-simulation-controller /app/ssl-simulation-controller
 USER 1000
 ENTRYPOINT ["/app/ssl-simulation-controller"]
