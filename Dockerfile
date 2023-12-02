@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine AS build
+FROM golang:1.21-alpine AS build
 WORKDIR /go/src/github.com/RoboCup-SSL/ssl-simulation-controller
 COPY go.mod go.mod
 COPY go.sum go.sum
