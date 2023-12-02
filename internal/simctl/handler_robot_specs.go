@@ -4,7 +4,7 @@ import (
 	"github.com/RoboCup-SSL/ssl-simulation-controller/internal/referee"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 	"log"
 	"os"
 )
