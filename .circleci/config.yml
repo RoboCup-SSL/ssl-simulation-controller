@@ -44,7 +44,7 @@ jobs:
 
   docker:
     docker:
-      - image: cimg/base:2023.12
+      - image: cimg/base:2024.01
     steps:
       - checkout
       - setup_remote_docker:
