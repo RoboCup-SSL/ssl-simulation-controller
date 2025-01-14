@@ -2,7 +2,7 @@ version: 2
 jobs:
   app:
     docker:
-      - image: cimg/go:1.23
+      - image: cimg/go:1.23@sha256:d89753cdb9f31e48c3a91aee6e73afcb23ad7e44abf7088491d8a9f002a71b67
 
     steps:
       - checkout
@@ -25,7 +25,7 @@ jobs:
 
   publish-github-release:
     docker:
-      - image: cimg/go:1.23
+      - image: cimg/go:1.23@sha256:d89753cdb9f31e48c3a91aee6e73afcb23ad7e44abf7088491d8a9f002a71b67
     steps:
       - attach_workspace:
           at: .
