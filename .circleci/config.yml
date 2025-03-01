@@ -1,82 +1,116 @@
-version: 2
-jobs:
-  app:
-    docker:
-      - image: cimg/go:1.23@sha256:7ad5b6d5a429411e365f93a685cd8902c42ac19875e866d8723551c03f9f3da7
+version: 2.1
+parameters:
+  cmds:
+    type: string
+    default: "ssl-simulation-controller"
 
+jobs:
+  test_go:
+    resource_class: medium
+    docker:
+      - image: cimg/go:1.23.5@sha256:d9d2cd7d194f229721b28b24c4ca5d8b6876b90e67ca6329943e202940288269
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - run: go get -v -t -d ./...
       - run: go test -v -covermode=count -coverprofile=count.out ./...
       - run: go tool cover -html=count.out -o coverage.html
-      - run:
-          working_directory: cmd/ssl-simulation-controller
-          command: |
-            GOOS=linux GOARCH=amd64 go build -o ../../release/ssl-simulation-controller_linux_amd64
-            GOOS=darwin GOARCH=amd64 go build -o ../../release/ssl-simulation-controller_darwin_amd64
-            GOOS=windows GOARCH=amd64 go build -o ../../release/ssl-simulation-controller_windows_amd64.exe
-      - persist_to_workspace:
-          root: .
-          paths:
-            - release/*
       - store_artifacts:
           path: coverage.html
           destination: coverage
 
-  publish-github-release:
+  build_go:
+    resource_class: large
     docker:
-      - image: cimg/go:1.23@sha256:7ad5b6d5a429411e365f93a685cd8902c42ac19875e866d8723551c03f9f3da7
+      - image: cimg/go:1.23.5@sha256:d9d2cd7d194f229721b28b24c4ca5d8b6876b90e67ca6329943e202940288269
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run: go get -v -t -d ./...
+      - run: |
+          set -u
+          version=${CIRCLE_TAG:-}
+          for cmd in << pipeline.parameters.cmds >>; do
+            GOOS=linux GOARCH=amd64 go build -o ./release/${cmd}_${version}_linux_amd64 ./cmd/${cmd}
+            GOOS=linux GOARCH=arm64 go build -o ./release/${cmd}_${version}_linux_arm64 ./cmd/${cmd}
+            GOOS=linux GOARCH=arm go build -o ./release/${cmd}_${version}_linux_arm ./cmd/${cmd}
+            GOOS=darwin GOARCH=amd64 go build -o ./release/${cmd}_${version}_darwin_amd64 ./cmd/${cmd}
+            GOOS=darwin GOARCH=arm64 go build -o ./release/${cmd}_${version}_darwin_arm64 ./cmd/${cmd}
+            GOOS=windows GOARCH=amd64 go build -o ./release/${cmd}_${version}_windows_amd64.exe ./cmd/${cmd}
+          done
+      - persist_to_workspace:
+          root: .
+          paths:
+            - release/*
+
+  publish_gh:
+    resource_class: small
+    docker:
+      - image: cimg/go:1.23.5@sha256:d9d2cd7d194f229721b28b24c4ca5d8b6876b90e67ca6329943e202940288269
     steps:
       - attach_workspace:
           at: .
-      - run:
-          name: "Prepare artifacts"
-          working_directory: release
-          command: |
-            mv ssl-simulation-controller_linux_amd64 ssl-simulation-controller_${CIRCLE_TAG}_linux_amd64
-            mv ssl-simulation-controller_darwin_amd64 ssl-simulation-controller_${CIRCLE_TAG}_darwin_amd64
-            mv ssl-simulation-controller_windows_amd64.exe ssl-simulation-controller_${CIRCLE_TAG}_windows_amd64.exe
-      - run:
-          name: "Publish Release on GitHub"
-          command: |
-            go install github.com/tcnksm/ghr@v0.14.0
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./release/
+      - run: |
+          set -u
+          go install github.com/tcnksm/ghr@v0.16.0
+          ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete -generatenotes ${CIRCLE_TAG} ./release
 
-  docker:
+  build_docker:
+    resource_class: small
     docker:
       - image: cimg/base:2025.01@sha256:f6b81723236539a091130e4f0e57c599253abf2e3980aa4e60eeee871b4e2ef7
     steps:
       - checkout
       - setup_remote_docker
       - run: |
+          docker buildx create \
+            --name container-builder \
+            --driver docker-container \
+            --bootstrap --use
+          for cmd in << pipeline.parameters.cmds >>; do
+            docker buildx build --platform linux/amd64,linux/arm64 --build-arg cmd=${cmd} -t robocupssl/${cmd}:latest .
+          done
+
+  publish_docker:
+    resource_class: small
+    docker:
+      - image: cimg/base:2025.01@sha256:f6b81723236539a091130e4f0e57c599253abf2e3980aa4e60eeee871b4e2ef7
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: |
+          docker buildx create \
+            --name container-builder \
+            --driver docker-container \
+            --bootstrap --use
+          
+          # Parse version from tag (removing 'v' prefix)
           TAG=${CIRCLE_TAG:1}
           TAG=${TAG:-latest}
-          docker build -t robocupssl/ssl-simulation-controller:$TAG .
-          docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
-          docker push robocupssl/ssl-simulation-controller:$TAG
+          for cmd in << pipeline.parameters.cmds >>; do
+            docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
+            docker buildx build --platform linux/amd64,linux/arm64 --build-arg cmd=${cmd} -t robocupssl/${cmd}:${TAG} --push .
+          done
 
 workflows:
   version: 2
-  main:
+  build:
     jobs:
-      - app:
-          filters:
-            tags:
-              only: /.*/
-      - publish-github-release:
+      - test_go
+  release:
+    jobs:
+      - build_go:
+          filters: { branches: { ignore: /.*/ }, tags: { only: /^v.*/ } }
+      - publish_gh:
           context: github
-          requires:
-            - app
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
-      - docker:
+          requires: [ build_go ]
+          filters: { branches: { ignore: /.*/ }, tags: { only: /^v.*/ } }
+  docker:
+    jobs:
+      - build_docker:
+          filters: { branches: { ignore: master } }
+      - publish_docker:
           context: docker hub
-          filters:
-            branches:
-              only: master
-            tags:
-              only: /^v.*/
-
+          filters: { branches: { only: master }, tags: { only: /^v.*/ } }
