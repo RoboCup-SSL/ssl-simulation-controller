@@ -4,59 +4,59 @@ field: <
   goal_width: 1800
   goal_depth: 300
   boundary_width: 300
-  penalty_area_depth: 1000
-  penalty_area_width: 2000
+  penalty_area_depth: 1800
+  penalty_area_width: 3600
   center_circle_radius: 500
   line_thickness: 10
-  goal_center_to_penalty_mark: 6000
+  goal_center_to_penalty_mark: 8000
   goal_height: 155
   ball_radius: 21.5
   max_robot_radius: 90
   field_lines: <
     name: "TopTouchLine"
     p1: <
-      x: -5995
-      y: 4495
+      x: -6000
+      y: 4500
     >
     p2: <
-      x: 5995
-      y: 4495
+      x: 6000
+      y: 4500
     >
     thickness: 10
   >
   field_lines: <
     name: "BottomTouchLine"
     p1: <
-      x: -5995
-      y: -4495
+      x: -6000
+      y: -4500
     >
     p2: <
-      x: 5995
-      y: -4495
+      x: 6000
+      y: -4500
     >
     thickness: 10
   >
   field_lines: <
     name: "LeftGoalLine"
     p1: <
-      x: -5990
-      y: -4495
+      x: -6000
+      y: -4500
     >
     p2: <
-      x: -5990
-      y: 4495
+      x: -6000
+      y: 4500
     >
     thickness: 10
   >
   field_lines: <
     name: "RightGoalLine"
     p1: <
-      x: 5990
-      y: -4495
+      x: 6000
+      y: -4500
     >
     p2: <
-      x: 5990
-      y: 4495
+      x: 6000
+      y: 4500
     >
     thickness: 10
   >
@@ -64,22 +64,22 @@ field: <
     name: "HalfwayLine"
     p1: <
       x: 0
-      y: -4495
+      y: -4500
     >
     p2: <
       x: 0
-      y: 4495
+      y: 4500
     >
     thickness: 10
   >
   field_lines: <
     name: "CenterLine"
     p1: <
-      x: -5990
+      x: -6000
       y: 0
     >
     p2: <
-      x: 5990
+      x: 6000
       y: 0
     >
     thickness: 10
@@ -87,11 +87,11 @@ field: <
   field_lines: <
     name: "LeftPenaltyStretch"
     p1: <
-      x: -4195
+      x: -4200
       y: -1800
     >
     p2: <
-      x: -4195
+      x: -4200
       y: 1800
     >
     thickness: 10
@@ -99,11 +99,11 @@ field: <
   field_lines: <
     name: "RightPenaltyStretch"
     p1: <
-      x: 4195
+      x: 4200
       y: -1800
     >
     p2: <
-      x: 4195
+      x: 4200
       y: 1800
     >
     thickness: 10
@@ -111,11 +111,11 @@ field: <
   field_lines: <
     name: "RightGoalTopLine"
     p1: <
-      x: 5990
+      x: 6000
       y: 900
     >
     p2: <
-      x: 6170
+      x: 6300
       y: 900
     >
     thickness: 10
@@ -123,11 +123,11 @@ field: <
   field_lines: <
     name: "RightGoalBottomLine"
     p1: <
-      x: 5990
+      x: 6000
       y: -900
     >
     p2: <
-      x: 6170
+      x: 6300
       y: -900
     >
     thickness: 10
@@ -135,11 +135,11 @@ field: <
   field_lines: <
     name: "RightGoalDepthLine"
     p1: <
-      x: 6165
+      x: 6300
       y: -900
     >
     p2: <
-      x: 6165
+      x: 6300
       y: 900
     >
     thickness: 10
@@ -147,11 +147,11 @@ field: <
   field_lines: <
     name: "LeftGoalTopLine"
     p1: <
-      x: -5990
+      x: -6000
       y: 900
     >
     p2: <
-      x: -6170
+      x: -6300
       y: 900
     >
     thickness: 10
@@ -159,11 +159,11 @@ field: <
   field_lines: <
     name: "LeftGoalBottomLine"
     p1: <
-      x: -5990
+      x: -6000
       y: -900
     >
     p2: <
-      x: -6170
+      x: -6300
       y: -900
     >
     thickness: 10
@@ -171,11 +171,11 @@ field: <
   field_lines: <
     name: "LeftGoalDepthLine"
     p1: <
-      x: -6165
+      x: -6300
       y: -900
     >
     p2: <
-      x: -6165
+      x: -6300
       y: 900
     >
     thickness: 10
@@ -183,11 +183,11 @@ field: <
   field_lines: <
     name: "LeftFieldLeftPenaltyStretch"
     p1: <
-      x: -5990
+      x: -6000
       y: 1800
     >
     p2: <
-      x: -4190
+      x: -4200
       y: 1800
     >
     thickness: 10
@@ -195,11 +195,11 @@ field: <
   field_lines: <
     name: "LeftFieldRightPenaltyStretch"
     p1: <
-      x: -5990
+      x: -6000
       y: -1800
     >
     p2: <
-      x: -4190
+      x: -4200
       y: -1800
     >
     thickness: 10
@@ -207,11 +207,11 @@ field: <
   field_lines: <
     name: "RightFieldLeftPenaltyStretch"
     p1: <
-      x: 5990
+      x: 6000
       y: -1800
     >
     p2: <
-      x: 4190
+      x: 4200
       y: -1800
     >
     thickness: 10
@@ -219,11 +219,11 @@ field: <
   field_lines: <
     name: "RightFieldRightPenaltyStretch"
     p1: <
-      x: 5990
+      x: 6000
       y: 1800
     >
     p2: <
-      x: 4190
+      x: 4200
       y: 1800
     >
     thickness: 10
@@ -234,7 +234,7 @@ field: <
       x: 0
       y: 0
     >
-    radius: 495
+    radius: 500
     a1: 0
     a2: 6.2831855
     thickness: 10
@@ -273,4 +273,16 @@ calib <
   derived_camera_world_tx: 3010
   derived_camera_world_ty: -0
   derived_camera_world_tz: 6000
+>
+models: <
+    straight_two_phase: <
+        acc_slide: -3
+        acc_roll: -0.26
+        k_switch: 0.64
+    >
+    chip_fixed_loss: <
+        damping_xy_first_hop: 0.75
+        damping_xy_other_hops: 0.95
+        damping_z: 0.5
+    >
 >
