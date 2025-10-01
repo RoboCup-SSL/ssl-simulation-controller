@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine@sha256:daae04ebad0c21149979cd8e9db38f565ecefd8547cf4a591240dc1972cf1399 AS build
+FROM golang:1.24-alpine@sha256:fc2cff6625f3c1c92e6c85938ac5bd09034ad0d4bc2dfb08278020b68540dbb5 AS build
 WORKDIR /go/src/github.com/RoboCup-SSL/ssl-simulation-controller
 COPY go.mod go.mod
 COPY go.sum go.sum
