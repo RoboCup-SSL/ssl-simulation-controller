@@ -5,6 +5,6 @@ go 1.23
 toolchain go1.25.3
 
 require (
-	google.golang.org/protobuf v1.36.9
+	google.golang.org/protobuf v1.36.10
 	gopkg.in/yaml.v3 v3.0.1
 )
