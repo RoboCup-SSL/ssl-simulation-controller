@@ -2,7 +2,7 @@ module github.com/RoboCup-SSL/ssl-simulation-controller
 
 go 1.23
 
-toolchain go1.25.6
+toolchain go1.26.0
 
 require (
 	google.golang.org/protobuf v1.36.11
